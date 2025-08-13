@@ -12,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
 @RestController
@@ -28,7 +25,12 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
 
-    @PostMapping("register")
+    @GetMapping("/")
+    public ResponseEntity<String> authInfo() {
+        return ResponseEntity.ok("Auth API is running");
+    }
+
+    @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request){
         if (userRepository.findByEmail(request.getEmail()).isPresent()){
             return ResponseEntity.badRequest().build();
@@ -44,6 +46,7 @@ public class AuthController {
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
+    @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request){
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
