@@ -33,20 +33,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = null;
         String username = null;
 
+        log.debug("Processing request: {} {}", request.getMethod(), request.getRequestURI());
+        log.debug("Authorization header: {}", authHeader);
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
+            log.debug("Extracted token: {}", token.substring(0, Math.min(token.length(), 20)) + "...");
+            
             try {
                 username = jwtUtil.getUsernameFromToken(token);
+                log.debug("Extracted username from token: {}", username);
             } catch (Exception e) {
                 log.warn("Failed to parse JWT token: {}", e.getMessage());
             }
-
+        } else {
+            log.debug("No valid Authorization header found");
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            log.debug("Loading user details for username: {}", username);
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
             if (jwtUtil.validateToken(token)) {
+                log.debug("JWT token is valid, setting authentication for user: {}", username);
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -58,7 +67,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } else {
                 log.warn("JWT token validation failed for user: {}", username);
             }
+        } else if (username == null) {
+            log.debug("No username extracted from token");
+        } else {
+            log.debug("Authentication already exists for user: {}", username);
         }
+        
         filterChain.doFilter(request, response);
     }
 }

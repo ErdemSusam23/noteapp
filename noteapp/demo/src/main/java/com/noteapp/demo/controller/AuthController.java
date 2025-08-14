@@ -8,6 +8,7 @@ import com.noteapp.demo.repository.UserRepository;
 import com.noteapp.demo.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,9 +26,20 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
 
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
     @GetMapping("/")
     public ResponseEntity<String> authInfo() {
         return ResponseEntity.ok("Auth API is running");
+    }
+
+    @GetMapping("/debug")
+    public ResponseEntity<String> debugInfo() {
+        String secretInfo = jwtSecret != null ? 
+            "JWT Secret is set (length: " + jwtSecret.length() + ")" : 
+            "JWT Secret is null";
+        return ResponseEntity.ok("Debug Info: " + secretInfo);
     }
 
     @PostMapping("/register")
