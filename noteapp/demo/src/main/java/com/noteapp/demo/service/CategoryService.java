@@ -6,6 +6,7 @@ import com.noteapp.demo.model.Category;
 import com.noteapp.demo.model.User;
 import com.noteapp.demo.repository.CategoryRepository;
 import com.noteapp.demo.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;

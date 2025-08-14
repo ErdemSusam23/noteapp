@@ -38,6 +38,7 @@ public class Activity {
 
     private LocalDateTime createdAt;
 
+    @PrePersist
     private void prePersist(){
         createdAt = LocalDateTime.now();
     }

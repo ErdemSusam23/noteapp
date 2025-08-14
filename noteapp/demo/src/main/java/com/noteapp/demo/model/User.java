@@ -38,6 +38,7 @@ public class User {
 
     private LocalDateTime createdAt;
 
+    @PrePersist
     public void prePersist(){
         createdAt = LocalDateTime.now();
     }

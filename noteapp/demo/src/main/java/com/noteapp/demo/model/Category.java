@@ -33,6 +33,7 @@ public class Category {
 
     private LocalDateTime createdAt;
 
+    @PrePersist
     private void prePersist(){
         createdAt = LocalDateTime.now();
     }
