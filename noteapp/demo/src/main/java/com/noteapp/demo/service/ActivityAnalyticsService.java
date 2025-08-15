@@ -222,4 +222,31 @@ public class ActivityAnalyticsService {
         
         return dailySummary;
     }
+
+    /**
+     * Son 6 ay için aylık toplamları (YYYY-MM -> toplam saat) olarak döner.
+     * Eksik ayları 0.0 ile doldurur ve en eskiden yeniye doğru sıralar.
+     */
+    public java.util.Map<String, Double> getLastSixMonthsTotals() {
+        java.time.YearMonth currentMonth = java.time.YearMonth.now();
+        java.time.YearMonth startMonth = currentMonth.minusMonths(5);
+        LocalDate startDate = startMonth.atDay(1);
+        LocalDate endDate = currentMonth.atEndOfMonth();
+
+        User user = getCurrentUser();
+        List<Activity> activities = activityRepository.findByUserAndDateBetween(user, startDate, endDate);
+
+        java.util.Map<String, Double> totals = activities.stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        a -> java.time.YearMonth.from(a.getDate()).toString(), // YYYY-MM
+                        java.util.stream.Collectors.summingDouble(Activity::getDurationHours)
+                ));
+
+        java.util.LinkedHashMap<String, Double> ordered = new java.util.LinkedHashMap<>();
+        for (java.time.YearMonth m = startMonth; !m.isAfter(currentMonth); m = m.plusMonths(1)) {
+            String key = m.toString(); // YYYY-MM
+            ordered.put(key, totals.getOrDefault(key, 0.0));
+        }
+        return ordered;
+    }
 }

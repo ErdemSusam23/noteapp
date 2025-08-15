@@ -77,38 +77,18 @@ public class DashboardController {
     }
 
     /**
-     * Aylık trend analizi
+     * Son 6 ay için aylık toplamlar (YYYY-MM -> toplam saat)
      */
     @GetMapping("/api/dashboard/trends/monthly")
-    public ResponseEntity<ActivityTrends> getMonthlyTrends() {
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = endDate.minusDays(29);
-        
-        Map<LocalDate, Double> monthlyData = analyticsService.getMonthlyActivitySummary();
-        Double totalDuration = monthlyData.values().stream().mapToDouble(Double::doubleValue).sum();
-        Double averageDuration = totalDuration / 30.0;
-        
-        LocalDate peakDay = monthlyData.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse(null);
-        Double peakValue = peakDay != null ? monthlyData.get(peakDay) : 0.0;
-        
-        long activeDays = monthlyData.values().stream().filter(duration -> duration > 0).count();
-        
-        ActivityTrends trends = ActivityTrends.builder()
-                .period("MONTHLY")
-                .dailyTrends(monthlyData)
+    public ResponseEntity<com.noteapp.demo.dto.MonthlyTotals> getMonthlyTotals() {
+        java.util.Map<String, Double> totals = analyticsService.getLastSixMonthsTotals();
+        Double totalDuration = totals.values().stream().mapToDouble(Double::doubleValue).sum();
+        com.noteapp.demo.dto.MonthlyTotals response = com.noteapp.demo.dto.MonthlyTotals.builder()
+                .period("LAST_6_MONTHS")
+                .monthlyTotals(totals)
                 .totalDuration(totalDuration)
-                .averageDuration(averageDuration)
-                .peakDay(peakDay)
-                .peakValue(peakValue)
-                .activeDays((int) activeDays)
-                .totalDays(30)
-                .completionRate(activeDays / 30.0)
                 .build();
-        
-        return ResponseEntity.ok(trends);
+        return ResponseEntity.ok(response);
     }
 
     /**
