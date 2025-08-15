@@ -1,6 +1,7 @@
 package com.noteapp.demo.repository;
 
 import com.noteapp.demo.model.Activity;
+import com.noteapp.demo.model.Category;
 import com.noteapp.demo.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,4 +11,5 @@ import java.util.List;
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByUser(User user);
     List<Activity> findByUserAndDateBetween(User user, LocalDate startDate, LocalDate endDate);
+    List<Activity> findByUserAndCategoryAndDateBetween(User user, Category category, LocalDate startDate, LocalDate endDate);
 }
