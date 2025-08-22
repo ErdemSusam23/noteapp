@@ -5,7 +5,10 @@ import com.noteapp.demo.dto.GoalResponse;
 import com.noteapp.demo.service.GoalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -16,13 +19,13 @@ public class GoalController {
     private final GoalService goalService;
 
     @PostMapping("/api/goals")
-    public ResponseEntity<GoalResponse> createGoal(@RequestBody GoalRequest request) {
+    public ResponseEntity<GoalResponse> createGoal(@Valid @RequestBody GoalRequest request) {
         return ResponseEntity.ok(goalService.createGoal(request));
     }
 
     @GetMapping("/api/goals")
-    public ResponseEntity<List<GoalResponse>> getUserGoals() {
-        return ResponseEntity.ok(goalService.getUserGoals());
+    public ResponseEntity<Page<GoalResponse>> getUserGoals(Pageable pageable) {
+        return ResponseEntity.ok(goalService.getUserGoals(pageable));
     }
 
     @GetMapping("/api/goals/{id}")
@@ -37,7 +40,7 @@ public class GoalController {
     }
 
     @PutMapping("/api/goals/{id}")
-    public ResponseEntity<GoalResponse> updateGoal(@PathVariable Long id, @RequestBody GoalRequest request) {
+    public ResponseEntity<GoalResponse> updateGoal(@PathVariable Long id, @Valid @RequestBody GoalRequest request) {
         return ResponseEntity.ok(goalService.updateGoal(id, request));
     }
 

@@ -19,7 +19,16 @@ public class JwtUtil {
     private Long jwtExpiration;
 
     private Key getSignKey(){
-        log.debug("Using JWT secret: {}", jwtSecret != null ? jwtSecret.substring(0, Math.min(jwtSecret.length(), 10)) + "..." : "null");
+        if (jwtSecret == null) {
+            log.error("JWT secret is null. Configure 'jwt.secret'.");
+            throw new IllegalStateException("JWT secret is not configured");
+        }
+        // HS256 için en az 256-bit (32 byte) secret önerilir
+        if (jwtSecret.length() < 32) {
+            log.error("JWT secret is too short (length: {}). Must be >= 32 characters.", jwtSecret.length());
+            throw new IllegalStateException("JWT secret is too short; must be at least 32 characters");
+        }
+        log.debug("Using JWT secret: {}", jwtSecret.substring(0, Math.min(jwtSecret.length(), 10)) + "...");
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
@@ -61,8 +70,11 @@ public class JwtUtil {
                     .parseClaimsJws(token);
             log.debug("Token validation successful");
             return true;
+        }catch (ExpiredJwtException e){
+            log.warn("Token expired at {}", e.getClaims() != null ? e.getClaims().getExpiration() : "unknown");
+            return false;
         }catch (JwtException e){
-            log.error("Token validation failed: {}", e.getMessage());
+            log.warn("Token validation failed: {}", e.getMessage());
             return false;
         }
 

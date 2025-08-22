@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -41,12 +43,10 @@ public class CategoryService {
         return new CategoryResponse(category.getId(), category.getName());
     }
 
-    public List<CategoryResponse> getUserCategories() {
+    public Page<CategoryResponse> getUserCategories(Pageable pageable) {
         User user = getCurrentUser();
-        return categoryRepository.findByUser(user)
-                .stream()
-                .map(c -> new CategoryResponse(c.getId(), c.getName()))
-                .collect(Collectors.toList());
+        return categoryRepository.findByUser(user, pageable)
+                .map(c -> new CategoryResponse(c.getId(), c.getName()));
     }
 
     public void deleteCategory(Long id) {

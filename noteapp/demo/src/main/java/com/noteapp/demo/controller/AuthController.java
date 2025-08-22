@@ -1,6 +1,7 @@
 package com.noteapp.demo.controller;
 
 import com.noteapp.demo.dto.AuthResponse;
+import com.noteapp.demo.dto.UserProfile;
 import com.noteapp.demo.dto.LoginRequest;
 import com.noteapp.demo.dto.RegisterRequest;
 import com.noteapp.demo.model.User;
@@ -13,7 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import org.springframework.web.client.HttpClientErrorException;
 
 @RestController
@@ -43,7 +47,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request){
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request){
         if (userRepository.findByEmail(request.getEmail()).isPresent()){
             return ResponseEntity.badRequest().build();
         }
@@ -59,11 +63,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request){
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request){
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
 
         String token = jwtUtil.generateToken(request.getEmail());
         return ResponseEntity.ok(new AuthResponse(token));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserProfile> me(@AuthenticationPrincipal UserDetails principal) {
+        User user = userRepository.findByEmail(principal.getUsername()).orElseThrow();
+        return ResponseEntity.ok(new UserProfile(user.getId(), user.getName(), user.getEmail(), user.getCreatedAt()));
     }
 
 

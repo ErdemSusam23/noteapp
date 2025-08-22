@@ -6,7 +6,10 @@ import com.noteapp.demo.service.ActivityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,13 +21,13 @@ public class ActivityController {
     private final ActivityService activityService;
 
     @PostMapping("/api/activities")
-    public ResponseEntity<ActivityResponse> createActivity(@RequestBody ActivityRequest request) {
+    public ResponseEntity<ActivityResponse> createActivity(@Valid @RequestBody ActivityRequest request) {
         return ResponseEntity.ok(activityService.createActivity(request));
     }
 
     @GetMapping("/api/activities")
-    public ResponseEntity<List<ActivityResponse>> getUserActivities() {
-        return ResponseEntity.ok(activityService.getUserActivities());
+    public ResponseEntity<Page<ActivityResponse>> getUserActivities(Pageable pageable) {
+        return ResponseEntity.ok(activityService.getUserActivities(pageable));
     }
 
     @GetMapping("/api/activities/{id}")
@@ -42,7 +45,7 @@ public class ActivityController {
     @PutMapping("/api/activities/{id}")
     public ResponseEntity<ActivityResponse> updateActivity(
             @PathVariable Long id, 
-            @RequestBody ActivityRequest request) {
+            @Valid @RequestBody ActivityRequest request) {
         return ResponseEntity.ok(activityService.updateActivity(id, request));
     }
 

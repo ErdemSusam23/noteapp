@@ -17,6 +17,8 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -81,12 +83,10 @@ public class GoalService {
         return mapToResponse(goal, 0.0, GoalStatus.ACTIVE);
     }
 
-    public List<GoalResponse> getUserGoals() {
+    public Page<GoalResponse> getUserGoals(Pageable pageable) {
         User user = getCurrentUser();
-        return goalRepository.findByUser(user)
-                .stream()
-                .map(this::mapToResponseWithComputedStatus)
-                .collect(Collectors.toList());
+        return goalRepository.findByUser(user, pageable)
+                .map(this::mapToResponseWithComputedStatus);
     }
 
     public GoalResponse getGoal(Long id) {

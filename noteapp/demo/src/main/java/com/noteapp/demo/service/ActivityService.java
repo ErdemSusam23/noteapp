@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -61,12 +63,10 @@ public class ActivityService {
         );
     }
 
-    public List<ActivityResponse> getUserActivities() {
+    public Page<ActivityResponse> getUserActivities(Pageable pageable) {
         User user = getCurrentUser();
-        return activityRepository.findByUser(user)
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return activityRepository.findByUser(user, pageable)
+                .map(this::mapToResponse);
     }
 
     public List<ActivityResponse> getUserActivitiesByDateRange(LocalDate startDate, LocalDate endDate) {
